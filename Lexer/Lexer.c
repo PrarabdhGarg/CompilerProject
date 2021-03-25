@@ -19,9 +19,14 @@ Token *newToken(Lexer *lexer, TokenType tokenType) {
     token -> token = tokenType;
     token -> lexeme = getLexeme(lexer -> buffer);
     token -> lineNumber = lexer -> lineNumber;
-    if(exists(token -> lexeme, lexer -> symbolTable) == NULL && (tokenType == TK_ID)) {
-        insertToken(token -> lexeme, token -> token, lexer -> symbolTable);
-    }
+    if(tokenType == TK_ID || tokenType == TK_RECORDID || tokenType == TK_FUNID || tokenType == TK_FIELDID) {
+        SymbolTableElement *element;
+        if((element = exists(token -> lexeme, lexer -> symbolTable)) == NULL) {
+            insertToken(token -> lexeme, token -> token, lexer -> symbolTable);
+        } else {
+            token -> token = element -> type;
+        }
+    }    
     return token;
 }
 
@@ -99,7 +104,7 @@ Token *getNextToken(Lexer *lexer) {
                     state = 46;
                     break;
                 case '\0':
-                    printf("Tokenization Complete\n");
+                    printf("\033[0;32mTokenization Complete\033[0m\n");
                     return NULL;
                 default: {
                     if(lookahead == 'a' || (lookahead >= 'e' && lookahead <= 'z')) {
@@ -109,7 +114,7 @@ Token *getNextToken(Lexer *lexer) {
                         state = 34;
                         break;
                     } else {
-                        printf("Lexical Error : Line Number %d : Some other symbol expected Found %c\n", lexer -> lineNumber, lookahead);
+                        printf("\033[0;31mLexical Error : Line Number %d : Some other symbol expected Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                         getLexeme(lexer -> buffer);
                         state = 0;
                         // return NULL;
@@ -154,7 +159,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '=') {
                 return newToken(lexer, TK_EQ);
             } else {
-                printf("Lexical Error : Line Number %d : Expected = Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected = Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -164,7 +169,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '=') {
                 return newToken(lexer, TK_NE);
             } else {
-                printf("Lexical Error : Line Number %d : Expected = Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected = Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -174,7 +179,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '&') {
                 state = 20;
             } else {
-                printf("Lexical Error : Line Number %d : Expected & Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected & Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -184,7 +189,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '&') {
                 return newToken(lexer, TK_AND);
             } else {
-                printf("Lexical Error : Line Number %d : Expected & Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected & Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -194,7 +199,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '@') {
                 state = 23;
             } else {
-                printf("Lexical Error : Line Number %d : Expected @ Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected @ Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -204,7 +209,7 @@ Token *getNextToken(Lexer *lexer) {
             if(lookahead == '@') {
                 return newToken(lexer, TK_OR);
             } else {
-                printf("Lexical Error : Line Number %d : Expected @ Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected @ Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 //  return NULL;
@@ -230,7 +235,7 @@ Token *getNextToken(Lexer *lexer) {
             if(isdigit(lookahead)) {
                 state = 37;
             } else {
-                printf("Lexical Error : Line Number %d : Expected digit Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected digit Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -240,7 +245,7 @@ Token *getNextToken(Lexer *lexer) {
             if(isdigit(lookahead)) {
                 return newToken(lexer, TK_RNUM);
             } else {
-                printf("Lexical Error : Line Number %d : Expected digit Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected digit Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -250,7 +255,7 @@ Token *getNextToken(Lexer *lexer) {
             if(islower(lookahead)) {
                 state = 40;
             } else {
-                printf("Lexical Error : Line Number %d : Expected [a-z] Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected [a-z] Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -268,7 +273,7 @@ Token *getNextToken(Lexer *lexer) {
             if(isalpha(lookahead)) {
                 state = 43;
             } else {
-                printf("Lexical Error : Line Number %d : Expected [a-z|A-Z] Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected [a-z|A-Z] Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -298,7 +303,7 @@ Token *getNextToken(Lexer *lexer) {
             } else if(lookahead >= '2' && lookahead <= '7') {
                 state = 47;
             } else {
-                printf("Lexical Error : Line Number %d : Expected [a-z]|[2-7] Found %c\n", lexer -> lineNumber, lookahead);
+                printf("\033[0;31mLexical Error : Line Number %d : Expected [a-z]|[2-7] Found %c\033[0m\n", lexer -> lineNumber, lookahead);
                 getLexeme(lexer -> buffer);
                 state = 0;
                 // return NULL;
@@ -336,7 +341,7 @@ Token *getNextToken(Lexer *lexer) {
 }
 
 void printToken(Token *token) {
-    printf("Token Type = %-10s Line Number = %-3d Value = %s\n", tokenTypeToString[token -> token], token -> lineNumber, token -> lexeme);
+    printf("Token Type = %-15s Line Number = %-3d Value = %s\n", tokenTypeToString[token -> token], token -> lineNumber, token -> lexeme);
 }
 
 void main() {
